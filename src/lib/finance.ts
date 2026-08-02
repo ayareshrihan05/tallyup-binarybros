@@ -139,7 +139,7 @@ export function summarize(
   return {
     income,
     spent,
-    left: budget + income - spent - (pocketMoney > 0 ? income : 0),
+    left: (pocketMoney > 0 ? pocketMoney + income : income) - spent,
     budget,
     byCategory,
     ratios: {
