@@ -98,7 +98,7 @@ export function GoalCoach({
           ))}
         </div>
       ) : (
-        <Conversation className="mb-3 max-h-72 rounded-2xl bg-muted/60">
+        <Conversation className="mb-3 max-h-96 rounded-2xl bg-muted/60">
           <ConversationContent className="gap-2 p-3">
             {messages.map((message) => (
               <Message from={message.role} key={message.id}>
