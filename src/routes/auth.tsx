@@ -5,8 +5,10 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    mode: search["mode"] === "login" ? ("login" as const) : ("signup" as const),
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { mode?: "login" | "signup" } => ({
+    mode: search["mode"] === "login" ? "login" : "signup",
   }),
   head: () => ({
     meta: [
@@ -31,7 +33,7 @@ const schema = z.object({
 function AuthScreen() {
   const { mode: initialMode } = Route.useSearch();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">(initialMode);
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">(initialMode ?? "signup");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
