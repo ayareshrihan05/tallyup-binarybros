@@ -3,15 +3,18 @@ import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AddTransactionSheet } from "@/components/AddTransactionSheet";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
+import { MonthCalendar } from "@/components/MonthCalendar";
 import { CategoryDoughnut } from "@/components/charts/SpendCharts";
 import {
   CATEGORY_META,
   CATEGORY_ORDER,
   formatMoney,
+  isFuture,
   monthKey,
   monthLabel,
   shiftMonth,
   summarize,
+  todayISO,
 } from "@/lib/finance";
 import { useDeleteTransaction, useMonthTransactions, useProfile } from "@/lib/queries";
 
@@ -30,6 +33,7 @@ export const Route = createFileRoute("/_authenticated/home")({
 function HomeScreen() {
   const [month, setMonth] = useState(() => monthKey());
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<string | null>(() => todayISO());
   const profile = useProfile();
   const transactions = useMonthTransactions(month);
   const deleteTransaction = useDeleteTransaction();
@@ -41,6 +45,19 @@ function HomeScreen() {
   );
 
   const firstName = (profile.data?.full_name || "there").split(" ")[0];
+
+  const dayEntries = useMemo(
+    () => (transactions.data ?? []).filter((txn) => txn.occurred_on === selectedDay),
+    [transactions.data, selectedDay],
+  );
+
+  function switchMonth(delta: number) {
+    setMonth((current) => {
+      const next = shiftMonth(current, delta);
+      setSelectedDay(`${next}-01`);
+      return next;
+    });
+  }
 
   return (
     <AppShell>
@@ -57,7 +74,7 @@ function HomeScreen() {
         <button
           type="button"
           aria-label="Previous month"
-          onClick={() => setMonth((current) => shiftMonth(current, -1))}
+          onClick={() => switchMonth(-1)}
           className="rounded-xl p-2 text-muted-foreground"
         >
           <ChevronLeft className="size-5" />
@@ -66,7 +83,7 @@ function HomeScreen() {
         <button
           type="button"
           aria-label="Next month"
-          onClick={() => setMonth((current) => shiftMonth(current, 1))}
+          onClick={() => switchMonth(1)}
           className="rounded-xl p-2 text-muted-foreground"
         >
           <ChevronRight className="size-5" />
@@ -84,6 +101,12 @@ function HomeScreen() {
           <Stat label="Received" value={formatMoney(summary.income, currency)} />
           <Stat label="Spent" value={formatMoney(summary.spent, currency)} />
         </div>
+        {summary.upcoming > 0 ? (
+          <p className="mt-3 rounded-2xl bg-muted p-3 text-xs font-bold text-muted-foreground">
+            📅 {formatMoney(summary.upcoming, currency)} scheduled later this month — not counted
+            yet.
+          </p>
+        ) : null}
       </section>
 
       <section className="card-pop mb-4 p-5">
@@ -110,26 +133,55 @@ function HomeScreen() {
         </ul>
       </section>
 
+      <section className="card-pop mb-4 p-4">
+        <h2 className="mb-3 text-lg">Calendar</h2>
+        <MonthCalendar
+          month={month}
+          transactions={transactions.data ?? []}
+          selected={selectedDay}
+          onSelect={setSelectedDay}
+          currency={currency}
+        />
+        <p className="mt-3 text-[11px] font-semibold text-muted-foreground">
+          Tap any day to see what happened.
+        </p>
+      </section>
+
       <section>
-        <h2 className="mb-2 text-lg">This month's entries</h2>
+        <h2 className="mb-2 text-lg">
+          {selectedDay
+            ? new Date(`${selectedDay}T00:00:00`).toLocaleDateString(undefined, {
+                weekday: "long",
+                day: "numeric",
+                month: "short",
+              })
+            : "Pick a day"}
+          {selectedDay && isFuture(selectedDay) ? " · upcoming" : ""}
+        </h2>
         {transactions.isLoading ? (
           <p className="text-sm font-semibold text-muted-foreground">Loading…</p>
-        ) : (transactions.data ?? []).length === 0 ? (
+        ) : dayEntries.length === 0 ? (
           <p className="card-pop p-4 text-sm font-semibold text-muted-foreground">
-            Nothing logged yet. Tap the + button to add your first entry.
+            Nothing on this day. Tap + to add an entry.
           </p>
         ) : (
           <ul className="space-y-2">
-            {(transactions.data ?? []).map((txn) => (
+            {dayEntries.map((txn) => (
               <li key={txn.id} className="card-pop flex items-center gap-3 p-3">
                 <span className="text-xl" aria-hidden>
                   {txn.type === "income" ? "💰" : CATEGORY_META[txn.category ?? "necessity"].emoji}
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-display text-sm">
-                    {txn.note || (txn.type === "income" ? "Money in" : CATEGORY_META[txn.category ?? "necessity"].label)}
+                    {txn.note ||
+                      (txn.type === "income"
+                        ? "Money in"
+                        : CATEGORY_META[txn.category ?? "necessity"].label)}
                   </p>
-                  <p className="text-xs font-semibold text-muted-foreground">{txn.occurred_on}</p>
+                  <p className="text-xs font-semibold text-muted-foreground">
+                    {txn.is_recurring ? "🔁 Monthly" : txn.occurred_on}
+                    {isFuture(txn.occurred_on) ? " · scheduled" : ""}
+                  </p>
                 </div>
                 <span
                   className={`font-display text-sm ${
@@ -162,7 +214,12 @@ function HomeScreen() {
         <Plus className="size-7" strokeWidth={3} />
       </button>
 
-      {sheetOpen ? <AddTransactionSheet onClose={() => setSheetOpen(false)} /> : null}
+      {sheetOpen ? (
+        <AddTransactionSheet
+          onClose={() => setSheetOpen(false)}
+          {...(selectedDay ? { defaultDate: selectedDay } : {})}
+        />
+      ) : null}
     </AppShell>
   );
 }

@@ -29,6 +29,7 @@ export const Route = createFileRoute("/_authenticated/stats")({
 
 function StatsScreen() {
   const [month] = useState(() => monthKey());
+  const [range, setRange] = useState<1 | 3 | 6>(6);
   const profile = useProfile();
   const transactions = useMonthTransactions(month);
   const recent = useRecentTransactions();
@@ -41,7 +42,9 @@ function StatsScreen() {
   );
 
   const trend = useMemo(() => {
-    const months = Array.from({ length: 6 }, (_, index) => shiftMonth(month, index - 5));
+    const months = Array.from({ length: range }, (_, index) =>
+      shiftMonth(month, index - (range - 1)),
+    );
     const totals = new Map(months.map((key) => [key, 0]));
     for (const txn of recent.data ?? []) {
       if (txn.type !== "expense") continue;
@@ -52,7 +55,7 @@ function StatsScreen() {
       labels: months.map((key) => monthLabel(key).split(" ")[0]!.slice(0, 3)),
       values: months.map((key) => totals.get(key) ?? 0),
     };
-  }, [recent.data, month]);
+  }, [recent.data, month, range]);
 
   const avgSpend =
     trend.values.filter((value) => value > 0).length > 0
@@ -88,7 +91,19 @@ function StatsScreen() {
       </section>
 
       <section className="card-pop mb-4 p-5">
-        <h2 className="mb-2 text-lg">6-month spending trend</h2>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h2 className="text-lg">Spending trend</h2>
+          <select
+            value={range}
+            aria-label="Trend range"
+            onChange={(event) => setRange(Number(event.target.value) as 1 | 3 | 6)}
+            className="rounded-xl border-2 border-border bg-background px-2 py-1 text-xs font-bold outline-none focus:border-primary"
+          >
+            <option value={1}>This month</option>
+            <option value={3}>3 months</option>
+            <option value={6}>6 months</option>
+          </select>
+        </div>
         <TrendLine labels={trend.labels} spent={trend.values} />
         <p className="mt-3 text-sm font-bold">
           Average month:{" "}
