@@ -195,3 +195,149 @@ export function useDeleteGoal() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["goals"] }),
   });
 }
+/* ---------------- Split with friends ---------------- */
+
+export type Friend = { id: string; name: string };
+
+export type SplitShare = {
+  id: string;
+  friend_id: string | null;
+  amount: number;
+  settled: boolean;
+};
+
+export type SplitExpense = {
+  id: string;
+  title: string;
+  total_amount: number;
+  occurred_on: string;
+  note: string;
+  split_shares: SplitShare[];
+};
+
+export function useFriends() {
+  return useQuery({
+    queryKey: ["friends"],
+    queryFn: async (): Promise<Friend[]> => {
+      const { data, error } = await supabase
+        .from("friends")
+        .select("id, name")
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useAddFriend() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (name: string) => {
+      const userId = await currentUserId();
+      const { error } = await supabase.from("friends").insert({ user_id: userId, name });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["friends"] }),
+  });
+}
+
+export function useDeleteFriend() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("friends").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+      queryClient.invalidateQueries({ queryKey: ["splits"] });
+    },
+  });
+}
+
+export function useSplitExpenses() {
+  return useQuery({
+    queryKey: ["splits"],
+    queryFn: async (): Promise<SplitExpense[]> => {
+      const { data, error } = await supabase
+        .from("split_expenses")
+        .select("id, title, total_amount, occurred_on, note, split_shares(id, friend_id, amount, settled)")
+        .order("occurred_on", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map((row) => ({
+        ...row,
+        total_amount: Number(row.total_amount),
+        split_shares: (row.split_shares ?? []).map((share) => ({
+          ...share,
+          amount: Number(share.amount),
+        })),
+      }));
+    },
+  });
+}
+
+export function useCreateSplit() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      title: string;
+      total_amount: number;
+      occurred_on: string;
+      note: string;
+      /** friend ids sharing the bill; null entry means you */
+      participants: (string | null)[];
+    }) => {
+      const userId = await currentUserId();
+      const inserted = await supabase
+        .from("split_expenses")
+        .insert({
+          user_id: userId,
+          title: input.title,
+          total_amount: input.total_amount,
+          occurred_on: input.occurred_on,
+          note: input.note,
+        })
+        .select("id")
+        .single();
+      if (inserted.error) throw inserted.error;
+
+      const each = input.total_amount / input.participants.length;
+      const rounded = Math.round(each * 100) / 100;
+      const shares = input.participants.map((friendId) => ({
+        expense_id: inserted.data.id,
+        friend_id: friendId,
+        amount: rounded,
+        settled: friendId === null,
+      }));
+      const { error } = await supabase.from("split_shares").insert(shares);
+      if (error) throw error;
+      return rounded;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["splits"] }),
+  });
+}
+
+export function useToggleShare() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; settled: boolean }) => {
+      const { error } = await supabase
+        .from("split_shares")
+        .update({ settled: input.settled })
+        .eq("id", input.id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["splits"] }),
+  });
+}
+
+export function useDeleteSplit() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("split_expenses").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["splits"] }),
+  });
+}
