@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      friends: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -80,12 +101,85 @@ export type Database = {
         }
         Relationships: []
       }
+      split_expenses: {
+        Row: {
+          created_at: string
+          id: string
+          note: string
+          occurred_on: string
+          title: string
+          total_amount: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string
+          occurred_on?: string
+          title: string
+          total_amount: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string
+          occurred_on?: string
+          title?: string
+          total_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      split_shares: {
+        Row: {
+          amount: number
+          created_at: string
+          expense_id: string
+          friend_id: string | null
+          id: string
+          settled: boolean
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          expense_id: string
+          friend_id?: string | null
+          id?: string
+          settled?: boolean
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          expense_id?: string
+          friend_id?: string | null
+          id?: string
+          settled?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "split_shares_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "split_expenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "split_shares_friend_id_fkey"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
           category: Database["public"]["Enums"]["spend_category"] | null
           created_at: string
           id: string
+          is_recurring: boolean
           note: string
           occurred_on: string
           type: Database["public"]["Enums"]["txn_type"]
@@ -96,6 +190,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["spend_category"] | null
           created_at?: string
           id?: string
+          is_recurring?: boolean
           note?: string
           occurred_on?: string
           type: Database["public"]["Enums"]["txn_type"]
@@ -106,6 +201,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["spend_category"] | null
           created_at?: string
           id?: string
+          is_recurring?: boolean
           note?: string
           occurred_on?: string
           type?: Database["public"]["Enums"]["txn_type"]
