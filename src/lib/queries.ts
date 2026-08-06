@@ -9,6 +9,8 @@ import {
   type TxnType,
 } from "@/lib/finance";
 
+const TXN_COLUMNS = "id, amount, type, category, note, occurred_on, is_recurring";
+
 async function currentUserId() {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) throw new Error("Not signed in");
@@ -57,7 +59,7 @@ export function useMonthTransactions(month: string) {
       const { start, end } = monthRange(month);
       const { data, error } = await supabase
         .from("transactions")
-        .select("id, amount, type, category, note, occurred_on")
+        .select(TXN_COLUMNS)
         .gte("occurred_on", start)
         .lte("occurred_on", end)
         .order("occurred_on", { ascending: false })
@@ -76,7 +78,7 @@ export function useRecentTransactions(days = 180) {
       since.setDate(since.getDate() - days);
       const { data, error } = await supabase
         .from("transactions")
-        .select("id, amount, type, category, note, occurred_on")
+        .select(TXN_COLUMNS)
         .gte("occurred_on", since.toISOString().slice(0, 10))
         .order("occurred_on", { ascending: true });
       if (error) throw error;
@@ -91,6 +93,7 @@ export type NewTransaction = {
   category: SpendCategory | null;
   note: string;
   occurred_on: string;
+  is_recurring: boolean;
 };
 
 export function useAddTransaction() {
@@ -105,6 +108,7 @@ export function useAddTransaction() {
         category: input.type === "expense" ? input.category : null,
         note: input.note,
         occurred_on: input.occurred_on,
+        is_recurring: input.is_recurring,
       });
       if (error) throw error;
     },

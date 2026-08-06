@@ -8,6 +8,7 @@ export type Transaction = {
   category: SpendCategory | null;
   note: string;
   occurred_on: string;
+  is_recurring?: boolean;
 };
 
 export type Profile = {
@@ -38,10 +39,10 @@ export const CATEGORY_META: Record<
     hint: "Food, rent, travel, books",
   },
   optional: {
-    label: "Optional",
-    emoji: "🎧",
+    label: "Subscriptions",
+    emoji: "📱",
     token: "optional",
-    hint: "Nice to have, not essential",
+    hint: "Netflix, Spotify, gym, data packs",
   },
   luxury: {
     label: "Luxuries",
@@ -52,6 +53,15 @@ export const CATEGORY_META: Record<
 };
 
 export const CATEGORY_ORDER: SpendCategory[] = ["necessity", "optional", "luxury"];
+
+export function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export function isFuture(dateISO: string) {
+  return dateISO > todayISO();
+}
 
 /** Chart.js needs real color strings, so resolve the CSS token at runtime. */
 export function tokenColor(token: string, fallback = "#22c55e") {
@@ -109,6 +119,8 @@ export type MonthSummary = {
   /** (category × 100) ÷ pocket money */
   ratios: Record<SpendCategory, number>;
   spentRatio: number;
+  /** Scheduled entries dated after today — never counted in spent/left. */
+  upcoming: number;
 };
 
 export function summarize(
@@ -122,9 +134,14 @@ export function summarize(
   };
   let income = 0;
   let spent = 0;
+  let upcoming = 0;
 
   for (const txn of transactions) {
     const amount = Number(txn.amount) || 0;
+    if (isFuture(txn.occurred_on)) {
+      if (txn.type === "expense") upcoming += amount;
+      continue;
+    }
     if (txn.type === "income") {
       income += amount;
       continue;
@@ -148,6 +165,7 @@ export function summarize(
       luxury: ratio(byCategory.luxury),
     },
     spentRatio: ratio(spent),
+    upcoming,
   };
 }
 
