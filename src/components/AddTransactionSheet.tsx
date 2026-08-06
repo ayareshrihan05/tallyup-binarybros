@@ -1,14 +1,28 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { CATEGORY_META, CATEGORY_ORDER, type SpendCategory, type TxnType } from "@/lib/finance";
+import {
+  CATEGORY_META,
+  CATEGORY_ORDER,
+  isFuture,
+  todayISO,
+  type SpendCategory,
+  type TxnType,
+} from "@/lib/finance";
 import { useAddTransaction } from "@/lib/queries";
 
-export function AddTransactionSheet({ onClose }: { onClose: () => void }) {
+export function AddTransactionSheet({
+  onClose,
+  defaultDate,
+}: {
+  onClose: () => void;
+  defaultDate?: string;
+}) {
   const [type, setType] = useState<TxnType>("expense");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<SpendCategory>("necessity");
   const [note, setNote] = useState("");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(() => defaultDate ?? todayISO());
+  const [recurring, setRecurring] = useState(false);
   const addTransaction = useAddTransaction();
 
   async function submit(event: React.FormEvent) {
@@ -29,8 +43,15 @@ export function AddTransactionSheet({ onClose }: { onClose: () => void }) {
         category: type === "expense" ? category : null,
         note: note.trim(),
         occurred_on: date,
+        is_recurring: recurring,
       });
-      toast.success(type === "income" ? "Money in! 💰" : "Logged. Nice work! ✅");
+      toast.success(
+        isFuture(date)
+          ? "Scheduled 📅 — it won't affect this month's balance until that day."
+          : type === "income"
+            ? "Money in! 💰"
+            : "Logged. Nice work! ✅",
+      );
       onClose();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not save");
@@ -139,6 +160,38 @@ export function AddTransactionSheet({ onClose }: { onClose: () => void }) {
               />
             </label>
           </div>
+
+          <div>
+            <span className="mb-2 block text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+              Repeats?
+            </span>
+            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-muted p-1">
+              {[
+                { value: false, label: "One-off" },
+                { value: true, label: "Monthly 🔁" },
+              ].map((option) => (
+                <button
+                  key={option.label}
+                  type="button"
+                  onClick={() => setRecurring(option.value)}
+                  className={`rounded-xl py-2 font-display text-sm ${
+                    recurring === option.value
+                      ? "bg-surface text-foreground shadow-sm"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {isFuture(date) ? (
+            <p className="rounded-2xl bg-secondary p-3 text-xs font-bold text-secondary-foreground">
+              This date is in the future — it's saved as upcoming and stays out of your spent
+              and left-to-spend totals until then.
+            </p>
+          ) : null}
 
           <button
             type="submit"

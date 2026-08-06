@@ -3,6 +3,7 @@ import { Plus, Sparkles, Trash2, Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AppShell, ScreenHeader } from "@/components/AppShell";
+import { GoalCoach } from "@/components/GoalCoach";
 import {
   forecastSavings,
   formatMoney,
@@ -104,6 +105,12 @@ function GoalsScreen() {
   }
 
   const achievedCount = (goals.data ?? []).filter((goal) => goal.achieved).length;
+  const coachGoals = (goals.data ?? []).map((goal) => ({
+    title: goal.title,
+    target: goal.target_amount,
+    saved: goal.saved_amount,
+    targetDate: goal.target_date,
+  }));
 
   return (
     <AppShell>
@@ -155,6 +162,13 @@ function GoalsScreen() {
           </button>
         </form>
       ) : null}
+
+      <GoalCoach
+        currency={currency}
+        pocketMoney={budget}
+        avgMonthlySpend={avgMonthlySpend}
+        goals={coachGoals}
+      />
 
       {goals.isLoading ? (
         <p className="text-sm font-semibold text-muted-foreground">Loading…</p>
