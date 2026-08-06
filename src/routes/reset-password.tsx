@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +26,7 @@ function ResetPasswordScreen() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
@@ -75,21 +77,31 @@ function ResetPasswordScreen() {
           <span className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
             New password
           </span>
-          <input
-            type="password"
-            value={password}
-            placeholder="••••••"
-            autoComplete="new-password"
-            onChange={(event) => setPassword(event.target.value)}
-            className="w-full rounded-2xl border-2 border-border bg-surface px-4 py-3 font-semibold text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
-          />
+          <span className="relative block">
+            <input
+              type={revealed ? "text" : "password"}
+              value={password}
+              placeholder="••••••"
+              autoComplete="new-password"
+              onChange={(event) => setPassword(event.target.value)}
+              className="w-full rounded-2xl border-2 border-border bg-surface px-4 py-3 pr-12 font-semibold text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
+            />
+            <button
+              type="button"
+              onClick={() => setRevealed((open) => !open)}
+              aria-label={revealed ? "Hide password" : "Show password"}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl p-2 text-muted-foreground"
+            >
+              {revealed ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+            </button>
+          </span>
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
             Confirm password
           </span>
           <input
-            type="password"
+            type={revealed ? "text" : "password"}
             value={confirm}
             placeholder="••••••"
             autoComplete="new-password"

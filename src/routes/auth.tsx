@@ -207,19 +207,35 @@ function Field({
   placeholder?: string;
   autoComplete?: string;
 }) {
+  const [revealed, setRevealed] = useState(false);
+  const isPassword = type === "password";
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
         {label}
       </span>
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-2xl border-2 border-border bg-surface px-4 py-3 font-semibold text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
-      />
+      <span className="relative block">
+        <input
+          type={isPassword && revealed ? "text" : type}
+          value={value}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          onChange={(event) => onChange(event.target.value)}
+          className={`w-full rounded-2xl border-2 border-border bg-surface px-4 py-3 font-semibold text-foreground outline-none placeholder:text-muted-foreground focus:border-primary ${
+            isPassword ? "pr-12" : ""
+          }`}
+        />
+        {isPassword ? (
+          <button
+            type="button"
+            onClick={() => setRevealed((open) => !open)}
+            aria-label={revealed ? "Hide password" : "Show password"}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl p-2 text-muted-foreground"
+          >
+            {revealed ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+          </button>
+        ) : null}
+      </span>
     </label>
   );
 }
