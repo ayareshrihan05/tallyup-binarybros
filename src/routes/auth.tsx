@@ -5,8 +5,10 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    mode: search["mode"] === "login" ? ("login" as const) : ("signup" as const),
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { mode?: "login" | "signup" } => ({
+    mode: search["mode"] === "login" ? "login" : "signup",
   }),
   head: () => ({
     meta: [
@@ -31,13 +33,36 @@ const schema = z.object({
 function AuthScreen() {
   const { mode: initialMode } = Route.useSearch();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "signup">(initialMode);
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">(initialMode ?? "signup");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
   const isSignup = mode === "signup";
+  const isForgot = mode === "forgot";
+
+  async function onReset(event: React.FormEvent) {
+    event.preventDefault();
+    const parsedEmail = z.string().trim().email().max(255).safeParse(email);
+    if (!parsedEmail.success) {
+      toast.error("Enter a valid email");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(parsedEmail.data, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Reset link sent — check your inbox 📬");
+      setMode("login");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not send reset link");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -85,15 +110,19 @@ function AuthScreen() {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-10">
       <div className="animate-pop-in">
-        <h1 className="text-3xl">{isSignup ? "Create your Pocket" : "Welcome back"}</h1>
+        <h1 className="text-3xl">
+          {isForgot ? "Reset password" : isSignup ? "Create your Pocket" : "Welcome back"}
+        </h1>
         <p className="mt-2 text-sm font-semibold text-muted-foreground">
-          {isSignup
+          {isForgot
+            ? "We'll email you a link to set a new password."
+            : isSignup
             ? "Your money, tracked in seconds a day."
             : "Log in to keep your streak going."}
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="mt-8 space-y-4">
+      <form onSubmit={isForgot ? onReset : onSubmit} className="mt-8 space-y-4">
         {isSignup ? (
           <Field
             label="Your name"
@@ -111,30 +140,52 @@ function AuthScreen() {
           placeholder="you@college.edu"
           autoComplete="email"
         />
-        <Field
-          label="Password"
-          type="password"
-          value={password}
-          onChange={setPassword}
-          placeholder="••••••"
-          autoComplete={isSignup ? "new-password" : "current-password"}
-        />
+        {isForgot ? null : (
+          <Field
+            label="Password"
+            type="password"
+            value={password}
+            onChange={setPassword}
+            placeholder="••••••"
+            autoComplete={isSignup ? "new-password" : "current-password"}
+          />
+        )}
+
+        {mode === "login" ? (
+          <button
+            type="button"
+            onClick={() => setMode("forgot")}
+            className="block text-sm font-bold text-primary"
+          >
+            Forgot password?
+          </button>
+        ) : null}
 
         <button
           type="submit"
           disabled={busy}
           className="w-full rounded-2xl bg-primary py-4 font-display text-lg text-primary-foreground shadow-[0_4px_0_0_color-mix(in_oklab,var(--primary)_65%,black)] transition active:translate-y-0.5 disabled:opacity-60"
         >
-          {busy ? "One sec…" : isSignup ? "Start tracking" : "Log in"}
+          {busy
+            ? "One sec…"
+            : isForgot
+              ? "Send reset link"
+              : isSignup
+                ? "Start tracking"
+                : "Log in"}
         </button>
       </form>
 
       <button
         type="button"
-        onClick={() => setMode(isSignup ? "login" : "signup")}
+        onClick={() => setMode(isSignup ? "login" : isForgot ? "login" : "signup")}
         className="mt-6 text-center text-sm font-bold text-primary"
       >
-        {isSignup ? "I already have an account" : "New here? Create an account"}
+        {isSignup
+          ? "I already have an account"
+          : isForgot
+            ? "Back to log in"
+            : "New here? Create an account"}
       </button>
     </div>
   );
