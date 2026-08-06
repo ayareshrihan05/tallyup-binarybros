@@ -102,7 +102,7 @@ export function GoalCoach({
           <ConversationContent className="gap-2 p-3">
             {messages.map((message) => (
               <Message from={message.role} key={message.id}>
-                <MessageContent variant={message.role === "user" ? "contained" : "flat"}>
+                <MessageContent>
                   <MessageResponse>{message.text}</MessageResponse>
                 </MessageContent>
               </Message>
@@ -126,7 +126,7 @@ export function GoalCoach({
           placeholder="How do I save for a laptop by June?"
         />
         <PromptInputFooter className="justify-end">
-          <PromptInputSubmit status={busy ? "submitted" : undefined} disabled={busy} />
+          <PromptInputSubmit status={busy ? "submitted" : "ready"} disabled={busy} />
         </PromptInputFooter>
       </PromptInput>
     </section>
