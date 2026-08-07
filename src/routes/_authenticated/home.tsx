@@ -31,12 +31,14 @@ export const Route = createFileRoute("/_authenticated/home")({
 });
 
 function HomeScreen() {
+  const currentMonth = monthKey();
   const [month, setMonth] = useState(() => monthKey());
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState<string | null>(() => todayISO());
   const profile = useProfile();
   const transactions = useMonthTransactions(month);
   const deleteTransaction = useDeleteTransaction();
+  const readOnly = month < currentMonth;
 
   const currency = profile.data?.currency ?? "INR";
   const summary = useMemo(
@@ -54,6 +56,11 @@ function HomeScreen() {
   function switchMonth(delta: number) {
     setMonth((current) => {
       const next = shiftMonth(current, delta);
+      if (next > currentMonth) return current;
+      if (next === currentMonth) {
+        setSelectedDay(todayISO());
+        return next;
+      }
       setSelectedDay(`${next}-01`);
       return next;
     });
@@ -84,11 +91,18 @@ function HomeScreen() {
           type="button"
           aria-label="Next month"
           onClick={() => switchMonth(1)}
-          className="rounded-xl p-2 text-muted-foreground"
+          disabled={month >= currentMonth}
+          className="rounded-xl p-2 text-muted-foreground disabled:opacity-30"
         >
           <ChevronRight className="size-5" />
         </button>
       </div>
+
+      {readOnly ? (
+        <p className="mb-4 rounded-2xl bg-muted p-3 text-xs font-bold text-muted-foreground">
+          🔒 Viewing a past month — entries can’t be added or removed here.
+        </p>
+      ) : null}
 
       <section className="card-pop mb-4 p-5 animate-pop-in">
         <p className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
@@ -162,7 +176,7 @@ function HomeScreen() {
           <p className="text-sm font-semibold text-muted-foreground">Loading…</p>
         ) : dayEntries.length === 0 ? (
           <p className="card-pop p-4 text-sm font-semibold text-muted-foreground">
-            Nothing on this day. Tap + to add an entry.
+            {readOnly ? "Nothing on this day." : "Nothing on this day. Tap + to add an entry."}
           </p>
         ) : (
           <ul className="space-y-2">
@@ -191,30 +205,34 @@ function HomeScreen() {
                   {txn.type === "income" ? "+" : "−"}
                   {formatMoney(txn.amount, currency)}
                 </span>
-                <button
-                  type="button"
-                  aria-label="Delete entry"
-                  onClick={() => deleteTransaction.mutate(txn.id)}
-                  className="rounded-xl p-2 text-muted-foreground"
-                >
-                  <Trash2 className="size-4" />
-                </button>
+                {readOnly ? null : (
+                  <button
+                    type="button"
+                    aria-label="Delete entry"
+                    onClick={() => deleteTransaction.mutate(txn.id)}
+                    className="rounded-xl p-2 text-muted-foreground"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                )}
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      <button
-        type="button"
-        onClick={() => setSheetOpen(true)}
-        aria-label="Add entry"
-        className="fixed bottom-24 left-1/2 z-40 ml-[7.5rem] flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_4px_0_0_color-mix(in_oklab,var(--primary)_65%,black)] active:translate-y-0.5"
-      >
-        <Plus className="size-7" strokeWidth={3} />
-      </button>
+      {readOnly ? null : (
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          aria-label="Add entry"
+          className="fixed bottom-24 left-1/2 z-40 ml-[7.5rem] flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_4px_0_0_color-mix(in_oklab,var(--primary)_65%,black)] active:translate-y-0.5"
+        >
+          <Plus className="size-7" strokeWidth={3} />
+        </button>
+      )}
 
-      {sheetOpen ? (
+      {sheetOpen && !readOnly ? (
         <AddTransactionSheet
           onClose={() => setSheetOpen(false)}
           {...(selectedDay ? { defaultDate: selectedDay } : {})}
