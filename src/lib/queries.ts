@@ -87,6 +87,25 @@ export function useRecentTransactions(days = 180) {
   });
 }
 
+/** Transactions across whole calendar months, inclusive — accurate for trend charts. */
+export function useRangeTransactions(startMonth: string, endMonth: string) {
+  return useQuery({
+    queryKey: ["transactions", "range", startMonth, endMonth],
+    queryFn: async (): Promise<Transaction[]> => {
+      const { start } = monthRange(startMonth);
+      const { end } = monthRange(endMonth);
+      const { data, error } = await supabase
+        .from("transactions")
+        .select(TXN_COLUMNS)
+        .gte("occurred_on", start)
+        .lte("occurred_on", end)
+        .order("occurred_on", { ascending: true });
+      if (error) throw error;
+      return (data ?? []).map((row) => ({ ...row, amount: Number(row.amount) }));
+    },
+  });
+}
+
 export type NewTransaction = {
   amount: number;
   type: TxnType;
