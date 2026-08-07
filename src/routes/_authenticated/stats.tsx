@@ -5,12 +5,13 @@ import { RatioBars, TrendLine } from "@/components/charts/SpendCharts";
 import {
   CATEGORY_META,
   formatMoney,
+  isFuture,
   monthKey,
   monthLabel,
   shiftMonth,
   summarize,
 } from "@/lib/finance";
-import { useMonthTransactions, useProfile, useRecentTransactions } from "@/lib/queries";
+import { useMonthTransactions, useProfile, useRangeTransactions } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/stats")({
   head: () => ({
@@ -32,7 +33,8 @@ function StatsScreen() {
   const [range, setRange] = useState<1 | 3 | 6>(6);
   const profile = useProfile();
   const transactions = useMonthTransactions(month);
-  const recent = useRecentTransactions();
+  const startMonth = shiftMonth(month, -(range - 1));
+  const history = useRangeTransactions(startMonth, month);
 
   const currency = profile.data?.currency ?? "INR";
   const pocketMoney = profile.data?.pocket_money ?? 0;
@@ -42,12 +44,33 @@ function StatsScreen() {
   );
 
   const trend = useMemo(() => {
+    const rows = (history.data ?? []).filter(
+      (txn) => txn.type === "expense" && !isFuture(txn.occurred_on),
+    );
+
+    if (range === 1) {
+      // Weekly buckets inside the current month: days 1-7, 8-14, ...
+      const [year, monthNumber] = month.split("-").map(Number);
+      const daysInMonth = new Date(year!, monthNumber!, 0).getDate();
+      const weeks = Math.ceil(daysInMonth / 7);
+      const values = Array.from({ length: weeks }, () => 0);
+      for (const txn of rows) {
+        if (txn.occurred_on.slice(0, 7) !== month) continue;
+        const day = Number(txn.occurred_on.slice(8, 10));
+        const index = Math.min(Math.floor((day - 1) / 7), weeks - 1);
+        values[index] = (values[index] ?? 0) + txn.amount;
+      }
+      return {
+        labels: values.map((_, index) => `Week ${index + 1}`),
+        values,
+      };
+    }
+
     const months = Array.from({ length: range }, (_, index) =>
       shiftMonth(month, index - (range - 1)),
     );
     const totals = new Map(months.map((key) => [key, 0]));
-    for (const txn of recent.data ?? []) {
-      if (txn.type !== "expense") continue;
+    for (const txn of rows) {
       const key = txn.occurred_on.slice(0, 7);
       if (totals.has(key)) totals.set(key, (totals.get(key) ?? 0) + txn.amount);
     }
@@ -55,13 +78,11 @@ function StatsScreen() {
       labels: months.map((key) => monthLabel(key).split(" ")[0]!.slice(0, 3)),
       values: months.map((key) => totals.get(key) ?? 0),
     };
-  }, [recent.data, month, range]);
+  }, [history.data, month, range]);
 
+  const active = trend.values.filter((value) => value > 0);
   const avgSpend =
-    trend.values.filter((value) => value > 0).length > 0
-      ? trend.values.reduce((sum, value) => sum + value, 0) /
-        trend.values.filter((value) => value > 0).length
-      : 0;
+    active.length > 0 ? active.reduce((sum, value) => sum + value, 0) / active.length : 0;
 
   return (
     <AppShell>
@@ -106,7 +127,7 @@ function StatsScreen() {
         </div>
         <TrendLine labels={trend.labels} spent={trend.values} />
         <p className="mt-3 text-sm font-bold">
-          Average month:{" "}
+          {range === 1 ? "Average week: " : "Average month: "}
           <span className="text-primary">{formatMoney(Math.round(avgSpend), currency)}</span>
         </p>
       </section>
