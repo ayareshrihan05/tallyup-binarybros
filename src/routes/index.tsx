@@ -44,9 +44,9 @@ function Landing() {
         <img
           src={logo.url}
           alt="TallyUP logo"
-          className="h-9 w-auto"
-          width={180}
-          height={36}
+          className="h-12 w-auto"
+          width={240}
+          height={48}
         />
         <h1 className="mt-6 text-4xl leading-tight">
           Know where your pocket money really goes.
