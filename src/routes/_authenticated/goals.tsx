@@ -23,12 +23,12 @@ import {
 export const Route = createFileRoute("/_authenticated/goals")({
   head: () => ({
     meta: [
-      { title: "Savings goals — Pocket" },
+      { title: "Savings goals — TallyUP" },
       {
         name: "description",
         content: "Set savings goals, get a predicted finish date and earn rewards when you hit them.",
       },
-      { property: "og:title", content: "Savings goals — Pocket" },
+      { property: "og:title", content: "Savings goals — TallyUP" },
       { property: "og:description", content: "Plan your savings and celebrate every goal you reach." },
     ],
   }),
@@ -174,7 +174,7 @@ function GoalsScreen() {
         <p className="text-sm font-semibold text-muted-foreground">Loading…</p>
       ) : (goals.data ?? []).length === 0 ? (
         <p className="card-pop p-4 text-sm font-semibold text-muted-foreground">
-          No goals yet. Add one and Pocket will predict when you'll get there.
+          No goals yet. Add one and TallyUP will predict when you'll get there.
         </p>
       ) : (
         <ul className="space-y-3">
@@ -230,7 +230,7 @@ function GoalsScreen() {
                     ? "Achieved! Reward unlocked — enjoy it guilt-free."
                     : forecast.monthsNeeded
                       ? `Saving ${formatMoney(Math.round(forecast.monthlySurplus), currency)} a month gets you there in about ${forecast.monthsNeeded} month(s).`
-                      : "Log a few spends and set your pocket money so Pocket can predict your finish date."}
+                      : "Log a few spends and set your pocket money so TallyUP can predict your finish date."}
                 </p>
 
                 {goal.achieved ? null : (

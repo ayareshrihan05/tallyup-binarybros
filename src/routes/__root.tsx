@@ -80,13 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Pocket — Money tracker for students" },
+      { title: "TallyUP — Money tracker for students" },
       {
         name: "description",
         content:
-          "Pocket helps students track income and expenses, see monthly summaries and hit savings goals.",
+          "TallyUP helps students track income and expenses, see monthly summaries and hit savings goals.",
       },
-      { property: "og:title", content: "Pocket — Money tracker for students" },
+      { property: "og:title", content: "TallyUP — Money tracker for students" },
       {
         property: "og:description",
         content:

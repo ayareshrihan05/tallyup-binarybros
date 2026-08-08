@@ -13,12 +13,12 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Sign in to Pocket" },
+      { title: "Sign in to TallyUP" },
       {
         name: "description",
-        content: "Log in or create your Pocket account to track student spending and savings.",
+        content: "Log in or create your TallyUP account to track student spending and savings.",
       },
-      { property: "og:title", content: "Sign in to Pocket" },
+      { property: "og:title", content: "Sign in to TallyUP" },
       { property: "og:description", content: "Access your student money tracker." },
     ],
   }),
@@ -112,7 +112,7 @@ function AuthScreen() {
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-10">
       <div className="animate-pop-in">
         <h1 className="text-3xl">
-          {isForgot ? "Reset password" : isSignup ? "Create your Pocket" : "Welcome back"}
+          {isForgot ? "Reset password" : isSignup ? "Create your TallyUP account" : "Welcome back"}
         </h1>
         <p className="mt-2 text-sm font-semibold text-muted-foreground">
           {isForgot
