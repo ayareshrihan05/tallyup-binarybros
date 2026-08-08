@@ -111,6 +111,13 @@ function AuthScreen() {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-10">
       <div className="animate-pop-in">
+        <img
+          src={logo.url}
+          alt="TallyUP logo"
+          className="mb-4 h-10 w-auto"
+          width={200}
+          height={40}
+        />
         <h1 className="text-3xl">
           {isForgot ? "Reset password" : isSignup ? "Create your TallyUP account" : "Welcome back"}
         </h1>
