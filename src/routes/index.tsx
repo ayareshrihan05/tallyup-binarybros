@@ -40,9 +40,13 @@ function Landing() {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-between px-6 py-10">
       <div className="animate-pop-in">
-        <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-secondary-foreground">
-          TallyUP
-        </span>
+        <img
+          src={logo.url}
+          alt="TallyUP logo"
+          className="h-14 w-auto"
+          width={280}
+          height={56}
+        />
         <h1 className="mt-6 text-4xl leading-tight">
           Know where your pocket money really goes.
         </h1>
