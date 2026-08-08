@@ -21,9 +21,9 @@ import { useDeleteTransaction, useMonthTransactions, useProfile } from "@/lib/qu
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
     meta: [
-      { title: "Your month — Pocket" },
+      { title: "Your month — TallyUP" },
       { name: "description", content: "Monthly summary of your income, spending and category split." },
-      { property: "og:title", content: "Your month — Pocket" },
+      { property: "og:title", content: "Your month — TallyUP" },
       { property: "og:description", content: "See what is left of your pocket money this month." },
     ],
   }),

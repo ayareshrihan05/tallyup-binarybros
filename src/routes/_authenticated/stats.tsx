@@ -16,12 +16,12 @@ import { useMonthTransactions, useProfile, useRangeTransactions } from "@/lib/qu
 export const Route = createFileRoute("/_authenticated/stats")({
   head: () => ({
     meta: [
-      { title: "Spending stats — Pocket" },
+      { title: "Spending stats — TallyUP" },
       {
         name: "description",
         content: "Category ratios against your pocket money plus a six-month spending trend.",
       },
-      { property: "og:title", content: "Spending stats — Pocket" },
+      { property: "og:title", content: "Spending stats — TallyUP" },
       { property: "og:description", content: "Charts of your necessity, optional and luxury spending." },
     ],
   }),

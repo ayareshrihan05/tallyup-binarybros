@@ -18,12 +18,12 @@ import {
 export const Route = createFileRoute("/_authenticated/split")({
   head: () => ({
     meta: [
-      { title: "Split with friends — Pocket" },
+      { title: "Split with friends — TallyUP" },
       {
         name: "description",
         content: "Split bills with friends, track who still owes you and settle up.",
       },
-      { property: "og:title", content: "Split with friends — Pocket" },
+      { property: "og:title", content: "Split with friends — TallyUP" },
       {
         property: "og:description",
         content: "Share a bill, split it evenly and keep track of who has paid you back.",

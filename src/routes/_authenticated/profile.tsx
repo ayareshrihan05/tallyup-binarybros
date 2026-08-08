@@ -9,10 +9,10 @@ import { useProfile, useUpdateProfile } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
-      { title: "Your profile — Pocket" },
+      { title: "Your profile — TallyUP" },
       { name: "description", content: "Update your name, monthly pocket money and currency." },
-      { property: "og:title", content: "Your profile — Pocket" },
-      { property: "og:description", content: "Manage your Pocket account settings." },
+      { property: "og:title", content: "Your profile — TallyUP" },
+      { property: "og:description", content: "Manage your TallyUP account settings." },
     ],
   }),
   component: ProfileScreen,

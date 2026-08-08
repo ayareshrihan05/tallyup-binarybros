@@ -8,13 +8,13 @@ export const Route = createFileRoute("/reset-password")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Set a new password — Pocket" },
+      { title: "Set a new password — TallyUP" },
       {
         name: "description",
-        content: "Choose a new password for your Pocket student money tracker account.",
+        content: "Choose a new password for your TallyUP student money tracker account.",
       },
-      { property: "og:title", content: "Set a new password — Pocket" },
-      { property: "og:description", content: "Finish resetting your Pocket password." },
+      { property: "og:title", content: "Set a new password — TallyUP" },
+      { property: "og:description", content: "Finish resetting your TallyUP password." },
     ],
   }),
   component: ResetPasswordScreen,

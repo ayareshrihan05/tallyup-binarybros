@@ -80,13 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Pocket — Money tracker for students" },
+      { title: "TallyUP — Money tracker for students" },
       {
         name: "description",
         content:
-          "Pocket helps students track income and expenses, see monthly summaries and hit savings goals.",
+          "TallyUP helps students track income and expenses, see monthly summaries and hit savings goals.",
       },
-      { property: "og:title", content: "Pocket — Money tracker for students" },
+      { property: "og:title", content: "TallyUP — Money tracker for students" },
       {
         property: "og:description",
         content:
@@ -105,7 +105,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,

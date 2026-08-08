@@ -1,17 +1,18 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/tallyup-logo.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Pocket — Student money tracker & savings goals" },
+      { title: "TallyUP — Student money tracker & savings goals" },
       {
         name: "description",
         content:
           "Track pocket money, sort spending into necessities, optional and luxuries, and hit savings goals with playful streaks.",
       },
-      { property: "og:title", content: "Pocket — Student money tracker" },
+      { property: "og:title", content: "TallyUP — Student money tracker" },
       {
         property: "og:description",
         content:
@@ -40,9 +41,13 @@ function Landing() {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-between px-6 py-10">
       <div className="animate-pop-in">
-        <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-secondary-foreground">
-          Pocket
-        </span>
+        <img
+          src={logo.url}
+          alt="TallyUP logo"
+          className="h-14 w-auto"
+          width={280}
+          height={56}
+        />
         <h1 className="mt-6 text-4xl leading-tight">
           Know where your pocket money really goes.
         </h1>
