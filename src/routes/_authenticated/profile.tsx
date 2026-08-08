@@ -41,7 +41,7 @@ function ProfileScreen() {
     event.preventDefault();
     const amount = Number(pocketMoney || 0);
     if (!Number.isFinite(amount) || amount < 0) {
-      toast.error("TallyUP money must be zero or more");
+      toast.error("Pocket money must be zero or more");
       return;
     }
     try {
