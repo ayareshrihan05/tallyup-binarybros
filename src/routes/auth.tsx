@@ -115,9 +115,9 @@ function AuthScreen() {
         <img
           src={logo.url}
           alt="TallyUP logo"
-          className="mb-4 h-9 w-auto"
-          width={180}
-          height={36}
+          className="mb-4 h-12 w-auto"
+          width={240}
+          height={48}
         />
         <h1 className="text-3xl">
           {isForgot ? "Reset password" : isSignup ? "Create your TallyUP account" : "Welcome back"}
