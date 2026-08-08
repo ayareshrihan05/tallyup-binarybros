@@ -1,14 +1,48 @@
-# Welcome to your Lovable project
+# Pocket Pal
+
+We are building a personal finance tracker for students with main features as shown below: 
+
+-Income & expense tracking 
+
+-Monthly summary 
+
+-Category-wise spending : Necessities, Optimal, and Luxuries.
+
+- Savings goal: AI based prediction and planning with rewards over achievement.
+
+-Charts (using Chart.js) 
+
+- 'Split over friends' tool
+
+•	Contact List (without phone numbers) imported
+
+•	Monthly Expenditure Simulation
+
+-Timer: One or two time notifications per day.
+
+Average: Charts based on the formula 
+
+(Luxury × 100) ÷ Pocket Money
+
+(Necessity x 100) ÷ Pocket Money 
+
+Interactive UI/UX (e.g. Duolingo)
+
+A mobile application only.
+
+Security: Password Login
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://tallyup-binarybros.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/cba421d4-8c65-49de-81bb-7fd96dacb295).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +54,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
