@@ -63,11 +63,25 @@ ${goalLines}`;
       body: JSON.stringify({
         model: "openai/gpt-5.6-terra",
         stream: true,
+        store: false,
         instructions: SYSTEM,
         input: [
-          { role: "user", content: `Here is my situation:\n${contextBlock}` },
-          ...data.history.map((message) => ({ role: message.role, content: message.text })),
-          { role: "user", content: data.question },
+          {
+            role: "user",
+            content: [{ type: "input_text", text: `Here is my situation:\n${contextBlock}` }],
+          },
+          ...data.history.map((message) =>
+            message.role === "assistant"
+              ? {
+                  role: "assistant" as const,
+                  content: [{ type: "output_text", text: message.text }],
+                }
+              : {
+                  role: "user" as const,
+                  content: [{ type: "input_text", text: message.text }],
+                },
+          ),
+          { role: "user", content: [{ type: "input_text", text: data.question }] },
         ],
       }),
     });
