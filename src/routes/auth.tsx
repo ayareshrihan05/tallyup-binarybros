@@ -1,3 +1,4 @@
+import logo from "@/assets/tallyup-logo.jpg.asset.json";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
