@@ -1,11 +1,6 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton,
-} from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import {
   PromptInput,
@@ -40,10 +35,19 @@ export function GoalCoach({
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!busy) textareaRef.current?.focus();
   }, [busy]);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    container.scrollTop = container.scrollHeight;
+    endRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  }, [messages, busy]);
 
   async function send(question: string) {
     const text = question.trim();
@@ -98,8 +102,13 @@ export function GoalCoach({
           ))}
         </div>
       ) : (
-        <Conversation className="mb-3 max-h-96 rounded-2xl bg-muted/60">
-          <ConversationContent className="gap-2 p-3">
+        <div
+          ref={scrollRef}
+          role="log"
+          aria-live="polite"
+          className="mb-3 max-h-96 overflow-y-auto overscroll-contain rounded-2xl bg-muted/60"
+        >
+          <div className="flex flex-col gap-2 p-3">
             {messages.map((message) => (
               <Message from={message.role} key={message.id}>
                 <MessageContent>
@@ -108,9 +117,9 @@ export function GoalCoach({
               </Message>
             ))}
             {busy ? <Shimmer>Thinking…</Shimmer> : null}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
+            <div ref={endRef} />
+          </div>
+        </div>
       )}
 
       <PromptInput
